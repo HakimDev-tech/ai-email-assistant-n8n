@@ -23,8 +23,8 @@
       "alwaysOutputData": false,
       "credentials": {
         "gmailOAuth2": {
-          "id": "S5BnW9tGsY8T1EBe",
-          "name": "Gmail account 2"
+          "id": "YOUR_GMAIL_CREDENTIAL",
+          "name": "Gmail account"
         }
       }
     },
@@ -322,7 +322,7 @@
       "name": "Update DataBase",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "IRcnBcyh5N2A6lQp",
+          "id": "YOUR_GOOGLE_SHEET_CREDENTIAL",
           "name": "Google Sheets account"
         }
       }
