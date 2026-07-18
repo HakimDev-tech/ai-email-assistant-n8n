@@ -30,7 +30,6 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-2.5-flash",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
@@ -40,13 +39,7 @@
         256
       ],
       "id": "8112cb13-fe17-42ab-89ce-07dd7b523400",
-      "name": "Google Gemini Chat Model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "kiVlekRrB1JwJlIo",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
+      "name": "Google Gemini Chat Model"
     },
     {
       "parameters": {
@@ -78,13 +71,7 @@
       ],
       "id": "a3150ed9-55b6-463e-9221-5d16da0dc802",
       "name": "Get a message",
-      "webhookId": "53aa3f39-7c7c-4ba6-ac2a-bcccdebf7827",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "S5BnW9tGsY8T1EBe",
-          "name": "Gmail account 2"
-        }
-      }
+      "webhookId": "53aa3f39-7c7c-4ba6-ac2a-bcccdebf7827"
     },
     {
       "parameters": {
@@ -342,7 +329,6 @@
     },
     {
       "parameters": {
-        "chatId": "7592754647",
         "text": "=📩 Nouvel email\n\nID : {{$json.gmailid}}\n\nExpéditeur : {{$json.from}}\n\nSujet : {{$json.subject}}\n\nRésumé :\n{{$json.summary}}\n\nRéponse proposée :\n{{$json.draft}}\n\n✅ Approuver :\n{{$execution.resumeUrl}}?action=approve&gmailId={{$json.gmailid}}\n\n❌ Rejeter :\n{{$execution.resumeUrl}}?action=reject&gmailId={{$json.gmailid}}\n\nResume URL:\n{{$execution.resumeUrl}}",
         "replyMarkup": "inlineKeyboard",
         "additionalFields": {}
@@ -355,119 +341,25 @@
       ],
       "id": "6a5bc379-1ec4-4440-9d2d-15ea23e7fafa",
       "name": "Notify",
-      "webhookId": "41a28d2d-391c-4f40-a101-209c14e18af0",
-      "credentials": {
-        "telegramApi": {
-          "id": "Sxoo3DRWjQ6mpfOh",
-          "name": "Telegram account"
-        }
-      }
+      "webhookId": "41a28d2d-391c-4f40-a101-209c14e18af0"
     },
     {
       "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc",
+          "value": "",
           "mode": "list",
-          "cachedResultName": "Email Assistant",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc/edit?usp=drivesdk"
+          "cachedResultName": "",
+          "cachedResultUrl": ""
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
+          "value": "",
           "mode": "list",
-          "cachedResultName": "Table 1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc/edit#gid=0"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "gmailid": "={{ $json.gmailId }}",
-            "date": "={{ $json.date }}",
-            "from": "={{ $json.from }}",
-            "subject": "={{ $json.subject }}",
-            "threadid": "={{ $json.threadId }}",
-            "cleanbody": "={{ $json.cleanBody }}",
-            "language": "={{ $json.language }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "gmailid",
-              "displayName": "gmailid",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "threadid",
-              "displayName": "threadid",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "date",
-              "displayName": "date",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "from",
-              "displayName": "from",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "subject",
-              "displayName": "subject",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "cleanbody",
-              "displayName": "cleanbody",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "language",
-              "displayName": "language",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
@@ -476,13 +368,7 @@
         -128
       ],
       "id": "11147684-9cdd-4d8f-9ddd-a61af19edfd9",
-      "name": "Fill The DataBase",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "IRcnBcyh5N2A6lQp",
-          "name": "Google Sheets account"
-        }
-      }
+      "name": "Fill The DataBase"
     }
   ],
   "pinData": {},
@@ -601,7 +487,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "1702ebd7-e09d-43a6-a8f9-a483b70b5187",
+  "versionId": "bf62f80c-ff9f-40a5-aab1-233ec47cd381",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8ca429d6baeb06d53fdfe862a33c2bc62b6f8dc0fe518c9b18b6458780748ed1"
