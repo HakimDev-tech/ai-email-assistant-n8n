@@ -1,0 +1,612 @@
+{
+  "name": "AI Email Assistant Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -368,
+        16
+      ],
+      "id": "f85f965d-99c7-430d-8d27-ef3369ff895e",
+      "name": "Gmail Trigger",
+      "alwaysOutputData": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "S5BnW9tGsY8T1EBe",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        256
+      ],
+      "id": "8112cb13-fe17-42ab-89ce-07dd7b523400",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiVlekRrB1JwJlIo",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "c2e37baf-060b-43e2-ab6d-e03fa3d1e62a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{$json.id}}",
+        "simple": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        16
+      ],
+      "id": "a3150ed9-55b6-463e-9221-5d16da0dc802",
+      "name": "Get a message",
+      "webhookId": "53aa3f39-7c7c-4ba6-ac2a-bcccdebf7827",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "S5BnW9tGsY8T1EBe",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function stripHtml(html) {\n  if (!html) return \"\";\n\n  return html\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, \"\")\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, \"\")\n    .replace(/<[^>]*>/g, \" \")\n    .replace(/&nbsp;/g, \" \")\n    .replace(/\\s+/g, \" \")\n    .trim();\n}\n\nconst body =\n  $json.text ||\n  stripHtml($json.html) ||\n  \"\";\n\nreturn [{\n  json: {\n    gmailId: $json.id,\n    threadId: $json.threadId,\n    date: $json.date || $json.internalDate,\n\n    from: $json.from?.text || \"\",\n    to: $json.to?.text || \"\",\n    subject: $json.subject || \"\",\n\n    cleanBody: body,\n\n    language: \"auto\",\n    status: \"received\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        16
+      ],
+      "id": "158ec037-2bcf-4a4d-831d-46bab35b3b8a",
+      "name": "Normalize Email"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI email assistant.\n\nYour task is to analyze a cleaned email.\n\nReturn ONLY one valid JSON object.\n\nDo NOT use Markdown.\n\nDo NOT wrap the JSON inside triple backticks.\n\nDo NOT explain anything.\n\nReturn exactly this schema:\n\n{\n  \"category\": \"Urgent | Important | Normal | Spam | Empty\",\n  \"summary\": \"string\",\n  \"draft\": \"string\",\n  \"shouldReply\": true,\n  \"reason\": \"string\",\n  \"confidence\": 0.95\n}\n\nRules:\n\n- Never invent information.\n- Use the same language as the email.\n- Preserve the sender's intent.\n- Never mention being an AI.\n- Never omit a field.\n- If a value is unavailable, return an empty string.\n- confidence must be between 0 and 1.\n\nIf the email is empty:\n\n{\n  \"category\":\"Empty\",\n  \"summary\":\"\",\n  \"draft\":\"\",\n  \"shouldReply\":false,\n  \"reason\":\"Email body is empty.\",\n  \"confidence\":1\n}\n\nINPUT\n\ngmailId:\n{{ $json.gmailId }}\n\ndate:\n{{ $json.date }}\n\nfrom:\n{{ $json.from }}\n\nto:\n{{ $json.to }}\n\nsubject:\n{{ $json.subject }}\n\ncleanBody:\n{{ $json.cleanBody }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Tu es un assistant spécialisé dans le traitement professionnel des emails.  Ton rôle est de : - analyser les emails ; - les classifier ; - produire un résumé ; - générer un brouillon de réponse si nécessaire.  Règles : - Ne fais aucune supposition. - N'invente jamais d'informations. - Conserve la langue de l'email. - Utilise un ton professionnel. - Si les informations sont insuffisantes, indique-le. - Réponds uniquement avec un JSON valide. - N'ajoute aucun texte avant ou après le JSON."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        80
+      ],
+      "id": "66e5a5bb-82b2-4621-9c75-626b6eb846b7",
+      "name": "Email Treating"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Retrieve raw text returned by Gemini\nlet raw = $json.text;\n\nif (!raw || typeof raw !== \"string\") {\n\tthrow new Error(\"Gemini did not return any text.\");\n}\n\n// Remove Markdown code fences if present\nraw = raw\n\t.replace(/^```json\\s*/i, \"\")\n\t.replace(/^```\\s*/i, \"\")\n\t.replace(/\\s*```$/i, \"\")\n\t.trim();\n\nlet result;\n\ntry {\n\tresult = JSON.parse(raw);\n} catch (e) {\n\tthrow new Error(\n\t\t`Le LLM n'a pas retourné un JSON valide.\\n\\nRéponse reçue :\\n${raw}`\n\t);\n}\n\n// Expected schema\nconst requiredFields = {\n\tcategory: \"string\",\n\tsummary: \"string\",\n\tdraft: \"string\",\n\tshouldReply: \"boolean\",\n\treason: \"string\",\n\tconfidence: \"number\"\n};\n\nfor (const [field, type] of Object.entries(requiredFields)) {\n\tif (!(field in result)) {\n\t\tthrow new Error(`Champ manquant dans la réponse du LLM : ${field}`);\n\t}\n\n\tif (typeof result[field] !== type) {\n\t\tthrow new Error(\n\t\t\t`Type invalide pour '${field}'. Attendu : ${type}, reçu : ${typeof result[field]}`\n\t\t);\n\t}\n}\n\n// Validate category\nconst allowedCategories = [\n\t\"Urgent\",\n\t\"Important\",\n\t\"Normal\",\n\t\"Spam\",\n\t\"Empty\"\n];\n\nif (!allowedCategories.includes(result.category)) {\n\tthrow new Error(\n\t\t`Catégorie invalide : ${result.category}`\n\t);\n}\n\n// Validate confidence\nif (result.confidence < 0 || result.confidence > 1) {\n\tthrow new Error(\n\t\t\"confidence must be between 0 and 1.\"\n\t);\n}\n\nreturn [\n\t{\n\t\tjson: result\n\t}\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        112
+      ],
+      "id": "c28d64ea-fa00-4b41-822c-0d4d388dcca2",
+      "name": "Parse AI Result"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc",
+          "mode": "list",
+          "cachedResultName": "Email Assistant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "gmailid": "={{ $json.gmailId }}",
+            "threadid": "={{ $json.threadId }}",
+            "date": "={{ $json.date }}",
+            "from": "={{ $json.from }}",
+            "subject": "={{ $json.subject }}",
+            "cleanbody": "={{ $json.cleanBody }}",
+            "language": "={{ $json.language }}",
+            "category": "={{ $json.category }}",
+            "summary": "={{ $json.summary }}",
+            "draft": "={{ $json.draft }}",
+            "shouldReply": "={{ $json.shouldReply }}",
+            "confidence": "={{ $json.confidence }}",
+            "reason": "={{ $json.reason }}",
+            "status": "={{ $json.status }}"
+          },
+          "matchingColumns": [
+            "gmailid"
+          ],
+          "schema": [
+            {
+              "id": "gmailid",
+              "displayName": "gmailid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "threadid",
+              "displayName": "threadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "from",
+              "displayName": "from",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cleanbody",
+              "displayName": "cleanbody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "draft",
+              "displayName": "draft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "shouldReply",
+              "displayName": "shouldReply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "b04628cd-4c6e-4a96-8e14-1415d3ca4281",
+      "name": "Update DataBase",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IRcnBcyh5N2A6lQp",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7592754647",
+        "text": "=📩 Nouvel email\n\nID : {{$json.gmailid}}\n\nExpéditeur : {{$json.from}}\n\nSujet : {{$json.subject}}\n\nRésumé :\n{{$json.summary}}\n\nRéponse proposée :\n{{$json.draft}}\n\n✅ Approuver :\n{{$execution.resumeUrl}}?action=approve&gmailId={{$json.gmailid}}\n\n❌ Rejeter :\n{{$execution.resumeUrl}}?action=reject&gmailId={{$json.gmailid}}\n\nResume URL:\n{{$execution.resumeUrl}}",
+        "replyMarkup": "inlineKeyboard",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "6a5bc379-1ec4-4440-9d2d-15ea23e7fafa",
+      "name": "Notify",
+      "webhookId": "41a28d2d-391c-4f40-a101-209c14e18af0",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sxoo3DRWjQ6mpfOh",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc",
+          "mode": "list",
+          "cachedResultName": "Email Assistant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LESM6Sqsyp2dsxf0H1QfQFp9nmQz6l4mJaovFpRqldc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "gmailid": "={{ $json.gmailId }}",
+            "date": "={{ $json.date }}",
+            "from": "={{ $json.from }}",
+            "subject": "={{ $json.subject }}",
+            "threadid": "={{ $json.threadId }}",
+            "cleanbody": "={{ $json.cleanBody }}",
+            "language": "={{ $json.language }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "gmailid",
+              "displayName": "gmailid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "threadid",
+              "displayName": "threadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "from",
+              "displayName": "from",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cleanbody",
+              "displayName": "cleanbody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        -128
+      ],
+      "id": "11147684-9cdd-4d8f-9ddd-a61af19edfd9",
+      "name": "Fill The DataBase",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IRcnBcyh5N2A6lQp",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Treating",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "Normalize Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Update DataBase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email": {
+      "main": [
+        [
+          {
+            "node": "Fill The DataBase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email Treating",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Treating": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Result": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Update DataBase": {
+      "main": [
+        [
+          {
+            "node": "Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify": {
+      "main": [
+        []
+      ]
+    },
+    "Fill The DataBase": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1702ebd7-e09d-43a6-a8f9-a483b70b5187",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8ca429d6baeb06d53fdfe862a33c2bc62b6f8dc0fe518c9b18b6458780748ed1"
+  },
+  "nodeGroups": [],
+  "id": "kxzsbcxyleLwioBh",
+  "tags": []
+}
