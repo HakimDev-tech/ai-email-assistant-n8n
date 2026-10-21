@@ -1,0 +1,12 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.credentials.json
+*credential-export*
+
+# Local execution payloads and test data
+execution-dumps/
+fixtures/private/
+*.eml
+*.mbox
