@@ -1,0 +1,144 @@
+{
+  "name": "00 - Bootstrap Email Decision Ledger",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        240
+      ],
+      "id": "n00-trigger",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "create",
+        "tableName": "EmailDecisionLedger",
+        "columns": {
+          "column": [
+            {
+              "name": "gmail_message_id",
+              "type": "string"
+            },
+            {
+              "name": "thread_id",
+              "type": "string"
+            },
+            {
+              "name": "received_at",
+              "type": "string"
+            },
+            {
+              "name": "sender",
+              "type": "string"
+            },
+            {
+              "name": "recipient",
+              "type": "string"
+            },
+            {
+              "name": "subject",
+              "type": "string"
+            },
+            {
+              "name": "body",
+              "type": "string"
+            },
+            {
+              "name": "category",
+              "type": "string"
+            },
+            {
+              "name": "priority",
+              "type": "number"
+            },
+            {
+              "name": "requested_action",
+              "type": "string"
+            },
+            {
+              "name": "summary",
+              "type": "string"
+            },
+            {
+              "name": "draft",
+              "type": "string"
+            },
+            {
+              "name": "evidence_json",
+              "type": "string"
+            },
+            {
+              "name": "risk_flags_json",
+              "type": "string"
+            },
+            {
+              "name": "model_confidence",
+              "type": "number"
+            },
+            {
+              "name": "state",
+              "type": "string"
+            },
+            {
+              "name": "approval_actor_id",
+              "type": "string"
+            },
+            {
+              "name": "approval_expires_at",
+              "type": "string"
+            },
+            {
+              "name": "attempt_count",
+              "type": "number"
+            },
+            {
+              "name": "last_error_code",
+              "type": "string"
+            },
+            {
+              "name": "sent_message_id",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        500,
+        240
+      ],
+      "id": "n00-table",
+      "name": "Create Ledger Table"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Ledger Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "v2-bootstrap-001",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
