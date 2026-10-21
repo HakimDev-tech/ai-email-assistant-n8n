@@ -147,7 +147,7 @@
             "evidence_json": "={{ $('Validate State + Expiry').first().json.evidence_json ?? \"\" }}",
             "risk_flags_json": "={{ $('Validate State + Expiry').first().json.risk_flags_json ?? \"\" }}",
             "model_confidence": "={{ $('Validate State + Expiry').first().json.model_confidence ?? \"\" }}",
-            "state": "=rejected",
+            "state": "rejected",
             "approval_actor_id": "={{ $('Validate State + Expiry').first().json.actor_id }}",
             "approval_expires_at": "={{ $('Validate State + Expiry').first().json.approval_expires_at ?? \"\" }}",
             "attempt_count": "={{ $('Validate State + Expiry').first().json.attempt_count ?? \"\" }}",
@@ -432,7 +432,7 @@
             "evidence_json": "={{ $('Validate State + Expiry').first().json.evidence_json ?? \"\" }}",
             "risk_flags_json": "={{ $('Validate State + Expiry').first().json.risk_flags_json ?? \"\" }}",
             "model_confidence": "={{ $('Validate State + Expiry').first().json.model_confidence ?? \"\" }}",
-            "state": "=sending",
+            "state": "sending",
             "approval_actor_id": "={{ $('Validate State + Expiry').first().json.actor_id }}",
             "approval_expires_at": "={{ $('Validate State + Expiry').first().json.approval_expires_at ?? \"\" }}",
             "attempt_count": "={{ Number($('Validate State + Expiry').first().json.attempt_count || 0) + 1 }}",
@@ -680,7 +680,8 @@
         160
       ],
       "id": "a-gmail-reply",
-      "name": "Reply to Approved Email"
+      "name": "Reply to Approved Email",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -719,7 +720,7 @@
             "evidence_json": "={{ $('Validate State + Expiry').first().json.evidence_json ?? \"\" }}",
             "risk_flags_json": "={{ $('Validate State + Expiry').first().json.risk_flags_json ?? \"\" }}",
             "model_confidence": "={{ $('Validate State + Expiry').first().json.model_confidence ?? \"\" }}",
-            "state": "=sent",
+            "state": "sent",
             "approval_actor_id": "={{ $('Validate State + Expiry').first().json.actor_id }}",
             "approval_expires_at": "={{ $('Validate State + Expiry').first().json.approval_expires_at ?? \"\" }}",
             "attempt_count": "={{ Number($('Validate State + Expiry').first().json.attempt_count || 0) + 1 }}",
@@ -966,6 +967,291 @@
       ],
       "id": "a-send-notify",
       "name": "Notify Sent"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "EmailDecisionLedger"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "gmail_message_id",
+              "condition": "eq",
+              "keyValue": "={{$('Validate State + Expiry').first().json.gmail_message_id}}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "gmail_message_id": "={{ $('Validate State + Expiry').first().json.gmail_message_id ?? \"\" }}",
+            "thread_id": "={{ $('Validate State + Expiry').first().json.thread_id ?? \"\" }}",
+            "received_at": "={{ $('Validate State + Expiry').first().json.received_at ?? \"\" }}",
+            "sender": "={{ $('Validate State + Expiry').first().json.sender ?? \"\" }}",
+            "recipient": "={{ $('Validate State + Expiry').first().json.recipient ?? \"\" }}",
+            "subject": "={{ $('Validate State + Expiry').first().json.subject ?? \"\" }}",
+            "body": "={{ $('Validate State + Expiry').first().json.body ?? \"\" }}",
+            "category": "={{ $('Validate State + Expiry').first().json.category ?? \"\" }}",
+            "priority": "={{ $('Validate State + Expiry').first().json.priority ?? \"\" }}",
+            "requested_action": "={{ $('Validate State + Expiry').first().json.requested_action ?? \"\" }}",
+            "summary": "={{ $('Validate State + Expiry').first().json.summary ?? \"\" }}",
+            "draft": "={{ $('Validate State + Expiry').first().json.draft ?? \"\" }}",
+            "evidence_json": "={{ $('Validate State + Expiry').first().json.evidence_json ?? \"\" }}",
+            "risk_flags_json": "={{ $('Validate State + Expiry').first().json.risk_flags_json ?? \"\" }}",
+            "model_confidence": "={{ $('Validate State + Expiry').first().json.model_confidence ?? \"\" }}",
+            "state": "send_uncertain",
+            "approval_actor_id": "={{ $('Validate State + Expiry').first().json.actor_id }}",
+            "approval_expires_at": "={{ $('Validate State + Expiry').first().json.approval_expires_at ?? \"\" }}",
+            "attempt_count": "={{ $('Validate State + Expiry').first().json.attempt_count ?? \"\" }}",
+            "last_error_code": "SEND_RESULT_AMBIGUOUS_RECONCILE_BEFORE_RETRY",
+            "sent_message_id": "={{ $('Validate State + Expiry').first().json.sent_message_id ?? \"\" }}"
+          },
+          "schema": [
+            {
+              "id": "gmail_message_id",
+              "displayName": "gmail_message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "thread_id",
+              "displayName": "thread_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sender",
+              "displayName": "sender",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recipient",
+              "displayName": "recipient",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "requested_action",
+              "displayName": "requested_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "draft",
+              "displayName": "draft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "evidence_json",
+              "displayName": "evidence_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "risk_flags_json",
+              "displayName": "risk_flags_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "model_confidence",
+              "displayName": "model_confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "approval_actor_id",
+              "displayName": "approval_actor_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "approval_expires_at",
+              "displayName": "approval_expires_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "attempt_count",
+              "displayName": "attempt_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_error_code",
+              "displayName": "last_error_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sent_message_id",
+              "displayName": "sent_message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        840,
+        400
+      ],
+      "id": "a-uncertain-save",
+      "name": "Mark Ambiguous Send"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{$('Validate State + Expiry').first().json.chat_id}}",
+        "text": "=⚠️ The reply attempt failed or timed out. The ledger is marked send_uncertain. Do not approve again or retry until you check the Gmail Sent folder.\\nSubject: {{$('Validate State + Expiry').first().json.subject}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1090,
+        400
+      ],
+      "id": "a-uncertain-notify",
+      "name": "Alert: Reconcile Before Retry"
     }
   ],
   "connections": {
@@ -1061,6 +1347,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Mark Ambiguous Send",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1069,6 +1362,17 @@
         [
           {
             "node": "Notify Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Ambiguous Send": {
+      "main": [
+        [
+          {
+            "node": "Alert: Reconcile Before Retry",
             "type": "main",
             "index": 0
           }
